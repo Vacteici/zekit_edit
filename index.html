@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZEKIT — Account Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050508;--s:#0a0a10;--b:#12121e;--b2:#1c1c2c;--b3:#26263a;
+  --acc:#c8f000;--acc2:#a8cc00;--acc-glow:rgba(200,240,0,.18);
+  --r:#ff3d55;--g:#00e87a;--cy:#00d4ff;
+  --t:#f0f0f8;--t2:#6868a0;--t3:#2a2a42;
+  --sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--disp:'Bebas Neue',cursive;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t);font-family:var(--sans);min-height:100vh;overflow-x:hidden;display:flex;flex-direction:column}
+
+/* ── GRID BG ── */
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(200,240,0,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(200,240,0,.018) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0}
+
+/* ── NOISE ── */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E")}
+
+/* ── ORBS ── */
+.orb{position:fixed;border-radius:50%;pointer-events:none;filter:blur(100px);z-index:0}
+.o1{width:600px;height:600px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(200,240,0,.06),transparent 70%)}
+.o2{width:500px;height:500px;bottom:-150px;right:-150px;background:radial-gradient(circle,rgba(0,212,255,.04),transparent 70%)}
+
+/* ── NAV ── */
+nav{position:relative;z-index:10;height:62px;padding:0 clamp(20px,5vw,52px);
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--b2)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nlm{width:34px;height:34px;background:var(--acc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:500;color:#000}
+.nln{font-family:var(--disp);font-size:20px;letter-spacing:2px;color:var(--t)}
+.nav-badge{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:4px 12px;border:1px solid var(--b3);border-radius:50px}
+
+/* ── HERO ── */
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px clamp(20px,5vw,52px) 100px;text-align:center;position:relative;z-index:1}
+
+.hero-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--acc);margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:28px;height:1px;background:rgba(200,240,0,.3)}
+
+h1{font-family:var(--disp);font-size:clamp(64px,10vw,120px);letter-spacing:3px;line-height:.9;
+  margin-bottom:16px;animation:fadeUp .7s ease both}
+h1 .accent{color:var(--acc)}
+h1 .muted{color:var(--t3);font-size:.6em}
+
+.hero-sub{font-size:14px;font-weight:300;color:var(--t2);max-width:400px;margin:0 auto 48px;
+  line-height:1.9;animation:fadeUp .7s .1s ease both}
+
+/* ── SEARCH BOX ── */
+.search-wrap{width:100%;max-width:560px;animation:fadeUp .7s .2s ease both}
+.search-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--t3);margin-bottom:10px;text-align:left}
+.search-box{position:relative;display:flex;align-items:center}
+.search-prefix{
+  position:absolute;left:18px;font-family:var(--mono);font-size:12px;color:var(--t3);
+  pointer-events:none;letter-spacing:.5px}
+.search-input{
+  width:100%;background:var(--s);border:1px solid var(--b3);border-radius:14px;
+  padding:18px 18px 18px 42px;font-family:var(--mono);font-size:14px;color:var(--t);
+  outline:none;transition:all .25s;letter-spacing:.5px;
+  caret-color:var(--acc)}
+.search-input::placeholder{color:var(--t3);letter-spacing:.5px}
+.search-input:focus{border-color:rgba(200,240,0,.35);background:var(--b);
+  box-shadow:0 0 0 4px rgba(200,240,0,.06),0 8px 32px rgba(0,0,0,.4)}
+.search-btn{
+  position:absolute;right:8px;padding:10px 20px;background:var(--acc);color:#000;
+  border:none;border-radius:10px;font-family:var(--sans);font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .2s;letter-spacing:.2px;display:flex;align-items:center;gap:7px}
+.search-btn:hover{background:var(--acc2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,240,0,.2)}
+.search-btn:active{transform:none}
+.search-btn svg{transition:transform .2s}
+.search-btn:hover svg{transform:translateX(2px)}
+
+.search-hint{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:10px;
+  text-align:left;letter-spacing:.3px}
+.search-hint a{color:var(--acc);text-decoration:none;opacity:.7}
+.search-hint a:hover{opacity:1}
+
+/* ── ERROR ── */
+.search-error{
+  margin-top:12px;padding:11px 16px;background:rgba(255,61,85,.06);
+  border:1px solid rgba(255,61,85,.2);border-radius:10px;
+  font-family:var(--mono);font-size:10px;color:#ff7080;display:none;
+  text-align:left;letter-spacing:.3px}
+
+/* ── FEATURES ── */
+.features{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:56px;
+  animation:fadeUp .7s .35s ease both}
+.feat{
+  display:flex;align-items:center;gap:9px;padding:9px 16px;
+  background:var(--s);border:1px solid var(--b2);border-radius:50px;
+  font-family:var(--mono);font-size:9px;letter-spacing:.8px;text-transform:uppercase;color:var(--t3)}
+.feat-dot{width:5px;height:5px;border-radius:50%;background:var(--t3)}
+.feat-dot.acc{background:var(--acc);box-shadow:0 0 8px rgba(200,240,0,.4)}
+.feat-dot.cy{background:var(--cy)}
+.feat-dot.g{background:var(--g)}
+
+/* ── RECENT ── */
+.recent-wrap{width:100%;max-width:560px;margin-top:40px;animation:fadeUp .7s .45s ease both}
+.recent-label{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--t3);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.recent-label::after{content:'';flex:1;height:1px;background:var(--b3)}
+.recent-list{display:flex;flex-direction:column;gap:4px}
+.recent-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--s);border:1px solid var(--b2);
+  border-radius:10px;cursor:pointer;transition:all .15s;
+  font-family:var(--mono);font-size:11px}
+.recent-item:hover{border-color:var(--b3);background:var(--b)}
+.ri-id{color:var(--t2);letter-spacing:.5px}
+.ri-time{font-size:9px;color:var(--t3)}
+.ri-go{color:var(--t3);font-size:9px}
+.recent-item:hover .ri-go{color:var(--acc)}
+
+/* ── FOOTER ── */
+footer{position:relative;z-index:1;border-top:1px solid var(--b2);
+  padding:20px clamp(20px,5vw,52px);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.ft-copy{font-family:var(--mono);font-size:9px;color:var(--t3)}
+.ft-links{display:flex;gap:16px}
+.ft-links a{font-family:var(--mono);font-size:9px;color:var(--t3);text-decoration:none;transition:color .15s}
+.ft-links a:hover{color:var(--t2)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:480px){.search-btn span{display:none}}
+</style>
+</head>
+<body>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nlm">Z.</div>
+    <span class="nln">ZEKIT</span>
+  </a>
+  <div class="nav-badge">Account Manager</div>
+</nav>
+
+<main class="hero">
+  <div class="hero-eyebrow">Gestion de compte</div>
+  <h1>
+    <span class="accent">Account</span><br>
+    <span>Manager</span><br>
+    <span class="muted">ZEKIT</span>
+  </h1>
+  <p class="hero-sub">Accède à ton compte ZEKIT pour consulter et modifier tes informations, gérer ton accès Premium et plus.</p>
+
+  <div class="search-wrap">
+    <div class="search-label">Ton ID Discord ou ZEKIT</div>
+    <div class="search-box">
+      <span class="search-prefix">#</span>
+      <input class="search-input" id="idInput" type="text" placeholder="Ex : 1234567890123456789"
+        maxlength="22" autocomplete="off" spellcheck="false"
+        oninput="onInput(this)" onkeydown="onKey(event)">
+      <button class="search-btn" id="goBtn" onclick="goToAccount()">
+        <span>Accéder</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+    <div class="search-hint">
+      Tu ne connais pas ton ID ? <a href="https://discord.gg/Eg7cGdqKKV" target="_blank">Tape /monid sur Discord →</a>
+    </div>
+    <div class="search-error" id="searchError">⚠ ID invalide — un ID Discord contient 17 à 20 chiffres.</div>
+  </div>
+
+  <div class="features">
+    <div class="feat"><div class="feat-dot acc"></div>Infos du compte</div>
+    <div class="feat"><div class="feat-dot g"></div>Statut Premium</div>
+    <div class="feat"><div class="feat-dot cy"></div>Historique</div>
+    <div class="feat"><div class="feat-dot"></div>Sécurisé</div>
+  </div>
+
+  <div class="recent-wrap" id="recentWrap" style="display:none">
+    <div class="recent-label">Consultés récemment</div>
+    <div class="recent-list" id="recentList"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="ft-copy">© 2026 ZEKIT — edit.zekit.fr</div>
+  <div class="ft-links">
+    <a href="https://zekit.fr">Site principal</a>
+    <a href="https://discord.gg/Eg7cGdqKKV" target="_blank">Discord</a>
+  </div>
+</footer>
+
+<script>
+'use strict';
+var ACCOUNT_PAGE = 'account.html';
+
+function onInput(el){
+  el.value = el.value.replace(/\D/g,'');
+  document.getElementById('searchError').style.display='none';
+}
+
+function onKey(e){ if(e.key==='Enter') goToAccount(); }
+
+function goToAccount(){
+  var id = document.getElementById('idInput').value.trim();
+  if(!id || id.length < 17 || id.length > 20){
+    document.getElementById('searchError').style.display='block';
+    return;
+  }
+  saveRecent(id);
+  window.location.href = ACCOUNT_PAGE + '?id=' + id;
+}
+
+/* ── Récents ── */
+function getRecents(){ try{ return JSON.parse(localStorage.getItem('zekit_recent_ids')||'[]'); }catch(e){ return []; } }
+function saveRecent(id){
+  var list = getRecents().filter(function(i){ return i.id !== id; });
+  list.unshift({ id: id, at: Date.now() });
+  if(list.length > 5) list = list.slice(0,5);
+  try{ localStorage.setItem('zekit_recent_ids', JSON.stringify(list)); }catch(e){}
+}
+function loadRecents(){
+  var list = getRecents();
+  if(!list.length) return;
+  var wrap = document.getElementById('recentWrap');
+  var cont = document.getElementById('recentList');
+  wrap.style.display = 'block';
+  cont.innerHTML = list.map(function(item){
+    var mins = Math.round((Date.now()-item.at)/60000);
+    var ts = mins<1?'À l\'instant':mins<60?'Il y a '+mins+'min':'Il y a '+Math.round(mins/60)+'h';
+    return '<div class="recent-item" onclick="goTo(\''+item.id+'\')">' +
+      '<span class="ri-id">#'+item.id+'</span>' +
+      '<span style="display:flex;align-items:center;gap:10px"><span class="ri-time">'+ts+'</span><span class="ri-go">→</span></span>' +
+    '</div>';
+  }).join('');
+}
+window.goTo = function(id){ saveRecent(id); window.location.href = ACCOUNT_PAGE + '?id=' + id; };
+
+loadRecents();
+</script>
+</body>
+</html>
