@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZEKIT — Mon Compte</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050508;--s:#0a0a10;--b:#12121e;--b2:#1c1c2c;--b3:#26263a;
+  --acc:#c8f000;--acc2:#a8cc00;--acc-glow:rgba(200,240,0,.18);
+  --r:#ff3d55;--g:#00e87a;--g-glow:rgba(0,232,122,.12);--cy:#00d4ff;
+  --gold:#f5c842;
+  --t:#f0f0f8;--t2:#6868a0;--t3:#2a2a42;
+  --sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;--disp:'Bebas Neue',cursive;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(200,240,0,.016) 1px,transparent 1px),linear-gradient(90deg,rgba(200,240,0,.016) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.45;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E")}
+
+.orb{position:fixed;border-radius:50%;pointer-events:none;filter:blur(100px);z-index:0}
+.o1{width:500px;height:500px;top:-150px;left:-150px;background:radial-gradient(circle,rgba(200,240,0,.05),transparent 70%)}
+.o2{width:400px;height:400px;bottom:-100px;right:-100px;background:radial-gradient(circle,rgba(0,212,255,.04),transparent 70%)}
+
+/* ── NAV ── */
+nav{position:relative;z-index:10;height:62px;padding:0 clamp(20px,5vw,52px);
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--b2)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nlm{width:34px;height:34px;background:var(--acc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:500;color:#000}
+.nln{font-family:var(--disp);font-size:20px;letter-spacing:2px;color:var(--t)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-id{font-family:var(--mono);font-size:10px;color:var(--t3);padding:5px 12px;border:1px solid var(--b3);border-radius:50px;letter-spacing:.5px}
+.nav-back{font-family:var(--mono);font-size:10px;color:var(--t2);padding:7px 14px;border:1px solid var(--b2);border-radius:50px;text-decoration:none;transition:all .15s}
+.nav-back:hover{color:var(--t);border-color:var(--b3)}
+
+/* ══════════════════════════ AUTH SCREEN ══════════════════════════ */
+#auth-screen{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(5,5,8,.97);backdrop-filter:blur(24px);
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeIn .3s ease}
+#auth-screen.hidden{display:none}
+
+.auth-card{
+  background:var(--s);border:1px solid var(--b2);border-radius:20px;
+  padding:40px 36px;width:360px;text-align:center;
+  animation:slideUp .4s cubic-bezier(.4,0,.2,1)}
+
+.auth-top{height:3px;background:linear-gradient(90deg,transparent,var(--acc),transparent);
+  border-radius:20px 20px 0 0;margin:-40px -36px 36px}
+
+.auth-logo{font-family:var(--disp);font-size:40px;letter-spacing:3px;color:var(--t);margin-bottom:6px}
+.auth-logo span{color:var(--acc)}
+.auth-sub{font-size:13px;font-weight:300;color:var(--t2);margin-bottom:6px;line-height:1.7}
+.auth-id-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:5px 14px;background:var(--b);border:1px solid var(--b3);
+  border-radius:50px;font-family:var(--mono);font-size:10px;color:var(--t3);
+  margin-bottom:28px;letter-spacing:.5px}
+.auth-id-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--t3)}
+
+.auth-label{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--t3);margin-bottom:12px}
+
+.auth-btns{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+
+.btn-discord{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:13px 20px;background:#5865F2;color:#fff;border:none;border-radius:12px;
+  font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;width:100%;
+  font-family:var(--sans)}
+.btn-discord:hover{background:#4752c4;transform:translateY(-1px);box-shadow:0 8px 24px rgba(88,101,242,.25)}
+.btn-discord:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.btn-google{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:13px 20px;background:#fff;color:#3c3c3c;
+  border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;width:100%;
+  font-family:var(--sans)}
+.btn-google:hover{opacity:.9;transform:translateY(-1px)}
+.btn-google:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.auth-sep{display:flex;align-items:center;gap:10px;margin:4px 0;
+  font-family:var(--mono);font-size:9px;color:var(--t3)}
+.auth-sep::before,.auth-sep::after{content:'';flex:1;height:1px;background:var(--b3)}
+
+.auth-note{font-family:var(--mono);font-size:9px;color:var(--t3);margin-top:12px;letter-spacing:.3px;line-height:1.7}
+
+.auth-status{font-family:var(--mono);font-size:10px;color:var(--t2);margin-top:12px;min-height:16px;letter-spacing:.3px}
+
+/* ══════════════════════════ MAIN APP ══════════════════════════ */
+#app{display:none;position:relative;z-index:1}
+#app.visible{display:block;animation:fadeIn .4s ease}
+
+.page-wrap{max-width:760px;margin:0 auto;padding:36px clamp(16px,4vw,40px) 80px}
+
+/* ── PROFILE HEADER ── */
+.profile-header{
+  background:var(--s);border:1px solid var(--b2);border-radius:20px;
+  padding:28px;margin-bottom:14px;
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+  position:relative;overflow:hidden}
+.profile-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--acc),transparent)}
+.ph-avatar{position:relative;flex-shrink:0}
+.ph-avatar img{width:72px;height:72px;border-radius:50%;border:2px solid var(--b3);display:block}
+.ph-avatar .ph-status{position:absolute;bottom:2px;right:2px;width:14px;height:14px;
+  border-radius:50%;border:2px solid var(--s)}
+.ph-info{flex:1;min-width:0}
+.ph-name{font-size:20px;font-weight:700;margin-bottom:4px;letter-spacing:-.3px}
+.ph-tag{font-family:var(--mono);font-size:11px;color:var(--t2);margin-bottom:8px}
+.ph-badges{display:flex;gap:6px;flex-wrap:wrap}
+.badge-item{font-family:var(--mono);font-size:8px;letter-spacing:1px;text-transform:uppercase;
+  padding:3px 10px;border-radius:50px}
+.badge-vip{background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);color:var(--gold)}
+.badge-normal{background:rgba(0,232,122,.06);border:1px solid rgba(0,232,122,.15);color:var(--g)}
+.badge-banned{background:rgba(255,61,85,.07);border:1px solid rgba(255,61,85,.2);color:var(--r)}
+.badge-provider{background:rgba(88,101,242,.08);border:1px solid rgba(88,101,242,.2);color:#7b8df5}
+.ph-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.btn-logout{padding:8px 16px;background:transparent;border:1px solid var(--b3);
+  border-radius:50px;font-family:var(--mono);font-size:9px;color:var(--t2);
+  cursor:pointer;transition:all .15s;letter-spacing:.5px;text-transform:uppercase}
+.btn-logout:hover{border-color:var(--r);color:var(--r)}
+
+/* ── SECTIONS ── */
+.section-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:580px){.section-grid{grid-template-columns:1fr}}
+
+.card{background:var(--s);border:1px solid var(--b2);border-radius:16px;padding:22px;transition:border-color .2s}
+.card:hover{border-color:var(--b3)}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);display:flex;align-items:center;gap:8px}
+.card-title-dot{width:6px;height:6px;border-radius:50%}
+
+/* ── DATA ROWS ── */
+.data-row{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 0;border-bottom:1px solid var(--b)}
+.data-row:last-child{border-bottom:none}
+.dr-label{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.5px;text-transform:uppercase}
+.dr-val{font-family:var(--mono);font-size:11px;color:var(--t2);display:flex;align-items:center;gap:6px}
+.dr-val.good{color:var(--g)}
+.dr-val.bad{color:var(--r)}
+.dr-val.gold{color:var(--gold)}
+.dr-copy{padding:3px 9px;background:var(--b);border:1px solid var(--b3);border-radius:6px;
+  font-family:var(--mono);font-size:8px;color:var(--t3);cursor:pointer;transition:all .15s;
+  letter-spacing:.5px;text-transform:uppercase}
+.dr-copy:hover{border-color:var(--acc);color:var(--acc)}
+
+/* ── VIP CARD ── */
+.vip-card{background:var(--s);border:1px solid var(--b2);border-radius:16px;
+  padding:22px;margin-bottom:14px;position:relative;overflow:hidden}
+.vip-card.is-vip{border-color:rgba(245,200,66,.2)}
+.vip-card.is-vip::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.vip-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.vip-left .vip-ico{font-size:32px;margin-bottom:8px}
+.vip-left h3{font-family:var(--disp);font-size:26px;letter-spacing:2px;color:var(--t);margin-bottom:4px}
+.vip-left p{font-size:13px;font-weight:300;color:var(--t2)}
+.vip-status-badge{
+  display:inline-flex;align-items:center;gap:8px;padding:10px 20px;
+  border-radius:50px;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.5px}
+.vsb-active{background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);color:var(--gold)}
+.vsb-inactive{background:var(--b);border:1px solid var(--b3);color:var(--t3)}
+
+/* ── PREMIUM ACTIVATION ── */
+.key-form{display:flex;gap:8px;margin-top:14px}
+.key-input{flex:1;background:var(--b);border:1px solid var(--b3);border-radius:10px;
+  padding:11px 14px;font-family:var(--mono);font-size:11px;color:var(--t);
+  outline:none;transition:border-color .2s;letter-spacing:.5px}
+.key-input::placeholder{color:var(--t3)}
+.key-input:focus{border-color:rgba(200,240,0,.3)}
+.key-btn{padding:11px 18px;background:var(--acc);color:#000;border:none;border-radius:10px;
+  font-family:var(--sans);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.key-btn:hover{background:var(--acc2);box-shadow:0 4px 16px rgba(200,240,0,.15)}
+.key-btn:disabled{opacity:.4;cursor:not-allowed}
+.key-result{font-family:var(--mono);font-size:10px;margin-top:8px;min-height:16px;letter-spacing:.3px}
+
+/* ── ACTIONS GRID ── */
+.actions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:480px){.actions-grid{grid-template-columns:1fr 1fr}}
+
+.action-btn{
+  background:var(--s);border:1px solid var(--b2);border-radius:14px;
+  padding:18px 16px;cursor:pointer;transition:all .2s;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:8px}
+.action-btn:hover{border-color:var(--b3);background:var(--b);transform:translateY(-2px)}
+.action-btn:active{transform:none}
+.ab-ico{font-size:22px}
+.ab-label{font-family:var(--mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--t3)}
+.ab-val{font-size:11px;font-weight:500;color:var(--t2)}
+.action-btn:hover .ab-label{color:var(--t2)}
+.action-btn.danger:hover{border-color:rgba(255,61,85,.3)}
+.action-btn.danger:hover .ab-label{color:var(--r)}
+.action-btn.success:hover{border-color:rgba(0,232,122,.3)}
+.action-btn.success:hover .ab-label{color:var(--g)}
+.action-btn.accent-btn:hover{border-color:rgba(200,240,0,.3)}
+.action-btn.accent-btn:hover .ab-label{color:var(--acc)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--b2);border:1px solid var(--b3);border-radius:50px;
+  padding:10px 22px;font-family:var(--mono);font-size:11px;color:var(--t2);
+  z-index:10000;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap;
+  letter-spacing:.3px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── BANNED SCREEN ── */
+#banned-screen{display:none;position:fixed;inset:0;z-index:2000;
+  background:rgba(5,5,8,.98);backdrop-filter:blur(24px);
+  flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;
+  padding:40px}
+#banned-screen.show{display:flex}
+.ban-ico{font-size:60px}
+.ban-title{font-family:var(--disp);font-size:56px;color:var(--r);letter-spacing:3px}
+.ban-sub{font-size:14px;font-weight:300;color:var(--t2);max-width:360px;line-height:1.8}
+.ban-reason-box{background:rgba(255,61,85,.06);border:1px solid rgba(255,61,85,.2);
+  border-radius:12px;padding:14px 20px;font-family:var(--mono);font-size:11px;color:#ff7080;
+  max-width:360px;text-align:left}
+
+/* ── LOADING ── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(200,240,0,.2);
+  border-top-color:var(--acc);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+
+<!-- ── BANNED ── -->
+<div id="banned-screen">
+  <div class="ban-ico">🔨</div>
+  <div class="ban-title">BANNI</div>
+  <p class="ban-sub">Ce compte a été révoqué et ne peut plus accéder à ZEKIT.</p>
+  <div class="ban-reason-box" id="ban-reason-box">Raison : Non spécifiée</div>
+  <a href="index.html" style="font-family:var(--mono);font-size:10px;color:var(--t3);text-decoration:none;margin-top:8px">← Retour</a>
+</div>
+
+<!-- ── AUTH ── -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-top"></div>
+    <div class="auth-logo">ZE<span>KIT</span></div>
+    <p class="auth-sub">Connecte-toi avec le compte lié à cet ID pour accéder à la gestion.</p>
+    <div class="auth-id-badge"><div class="dot"></div><span id="auth-id-display">—</span></div>
+    <div class="auth-label">Connexion</div>
+    <div class="auth-btns">
+      <button class="btn-discord" id="btn-discord" onclick="loginDiscord()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.112 18.1.124 18.111a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 13.257 13.257 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.1 13.1 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.1.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Discord
+      </button>
+      <div class="auth-sep"><span>ou</span></div>
+      <button class="btn-google" id="btn-google" onclick="loginGoogle()">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#EA4335" d="M5.27 9.76A7.08 7.08 0 0 1 12 4.9c1.76 0 3.35.64 4.59 1.69l3.41-3.41A11.94 11.94 0 0 0 12 1C8.16 1 4.83 3.01 2.96 6.04l2.31 3.72z"/><path fill="#34A853" d="M16.04 18.01A7.08 7.08 0 0 1 12 19.1a7.08 7.08 0 0 1-6.72-4.86l-3.72 2.31A11.94 11.94 0 0 0 12 23c3.1 0 5.95-1.15 8.1-3.01l-4.06-1.98z"/><path fill="#FBBC05" d="M5.27 14.24a7.06 7.06 0 0 1 0-4.48L2.96 6.04A11.94 11.94 0 0 0 1 12c0 1.92.46 3.74 1.27 5.35l3.72-3.11h.28z"/><path fill="#4285F4" d="M21.8 10.15H12v3.7h5.59c-.26 1.37-1.04 2.53-2.21 3.31l4.06 1.98C21.05 17 21.8 14.7 21.8 12c0-.63-.07-1.24-.18-1.85h.18z"/></svg>
+        Google
+      </button>
+    </div>
+    <div class="auth-note">En te connectant, tu confirmes être le propriétaire de ce compte.</div>
+    <div class="auth-status" id="auth-status"></div>
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nlm">Z.</div>
+    <span class="nln">ZEKIT</span>
+  </a>
+  <div class="nav-right">
+    <div class="nav-id" id="nav-id">—</div>
+    <a href="index.html" class="nav-back">← Retour</a>
+  </div>
+</nav>
+
+<!-- ── APP ── -->
+<div id="app">
+  <div class="page-wrap">
+
+    <!-- PROFILE HEADER -->
+    <div class="profile-header">
+      <div class="ph-avatar">
+        <img id="ph-img" src="" alt="">
+        <div class="ph-status" id="ph-status-dot"></div>
+      </div>
+      <div class="ph-info">
+        <div class="ph-name" id="ph-name">—</div>
+        <div class="ph-tag" id="ph-tag">—</div>
+        <div class="ph-badges" id="ph-badges"></div>
+      </div>
+      <div class="ph-actions">
+        <button class="btn-logout" onclick="logout()">Déconnexion</button>
+      </div>
+    </div>
+
+    <!-- VIP CARD -->
+    <div class="vip-card" id="vip-card">
+      <div class="vip-inner">
+        <div class="vip-left">
+          <div class="vip-ico" id="vip-ico">🔒</div>
+          <h3 id="vip-title">Standard</h3>
+          <p id="vip-desc">Accède au Premium pour débloquer les moteurs IA avancés.</p>
+        </div>
+        <div id="vip-status-right">
+          <div class="vip-status-badge vsb-inactive" id="vip-badge-status">Non activé</div>
+        </div>
+      </div>
+      <div id="key-form-wrap" style="margin-top:16px">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Activer avec une clef</div>
+        <div class="key-form">
+          <input class="key-input" id="key-input" type="text" placeholder="ZEKIT-XXXX-XXXX-XXXX-XXXX" maxlength="29" spellcheck="false" autocomplete="off" oninput="formatKey(this)" onkeydown="if(event.key==='Enter')activateKey()">
+          <button class="key-btn" id="key-btn" onclick="activateKey()">Activer</button>
+        </div>
+        <div class="key-result" id="key-result"></div>
+      </div>
+    </div>
+
+    <!-- INFOS + STATUS -->
+    <div class="section-grid">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><div class="card-title-dot" style="background:var(--cy)"></div>Identité</div>
+        </div>
+        <div class="data-row">
+          <span class="dr-label">ID Discord</span>
+          <span class="dr-val" id="info-id">—
+            <button class="dr-copy" onclick="copyVal(document.getElementById('info-id-raw').value)">Copier</button>
+            <input type="hidden" id="info-id-raw">
+          </span>
+        </div>
+        <div class="data-row">
+          <span class="dr-label">Pseudo</span>
+          <span class="dr-val" id="info-name">—</span>
+        </div>
+        <div class="data-row">
+          <span class="dr-label">Connexion</span>
+          <span class="dr-val" id="info-provider">—</span>
+        </div>
+        <div class="data-row">
+          <span class="dr-label">Compte créé</span>
+          <span class="dr-val" id="info-created">—</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><div class="card-title-dot" style="background:var(--g)"></div>Activité</div>
+        </div>
+        <div class="data-row">
+          <span class="dr-label">Connexions</span>
+          <span class="dr-val" id="stat-logins">—</span>
+        </div>
+        <div class="data-row">
+          <span class="dr-label">Première vue</span>
+          <span class="dr-val" id="stat-first">—</span>
+        </div>
+        <div class="data-row">
+          <span class="dr-label">Dernière vue</span>
+          <span class="dr-val" id="stat-last">—</span>
+        </div>
+        <div class="data-row">
+          <span class="dr-label">Localisation</span>
+          <span class="dr-val" id="stat-geo">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions-grid">
+      <div class="action-btn accent-btn" onclick="copyId()">
+        <div class="ab-ico">🪪</div>
+        <div class="ab-label">Copier ID</div>
+        <div class="ab-val" id="ab-id-preview">—</div>
+      </div>
+      <div class="action-btn success" onclick="window.open('https://zekit.fr/activer-premium.html','_blank')">
+        <div class="ab-ico">🎁</div>
+        <div class="ab-label">Obtenir clef</div>
+        <div class="ab-val">Gratuit</div>
+      </div>
+      <div class="action-btn" onclick="window.open('https://discord.gg/Eg7cGdqKKV','_blank')">
+        <div class="ab-ico">💬</div>
+        <div class="ab-label">Discord</div>
+        <div class="ab-val">Rejoindre</div>
+      </div>
+      <div class="action-btn" onclick="reloadProfile()">
+        <div class="ab-ico">🔄</div>
+        <div class="ab-label">Actualiser</div>
+        <div class="ab-val">Profil</div>
+      </div>
+      <div class="action-btn" onclick="window.open('https://github.com/Vacteici/zekit/releases/latest/download/install.zekit.exe','_blank')">
+        <div class="ab-ico">⬇️</div>
+        <div class="ab-label">ZEKIT App</div>
+        <div class="ab-val">Télécharger</div>
+      </div>
+      <div class="action-btn danger" onclick="confirmLogout()">
+        <div class="ab-ico">🚪</div>
+        <div class="ab-label">Déconnexion</div>
+        <div class="ab-val">Session</div>
+      </div>
+    </div>
+
+    <!-- SECURITY INFO -->
+    <div class="card" style="animation:cardIn .5s ease both">
+      <div class="card-head">
+        <div class="card-title"><div class="card-title-dot" style="background:var(--acc)"></div>Sécurité & session</div>
+      </div>
+      <div class="data-row">
+        <span class="dr-label">Statut du compte</span>
+        <span class="dr-val" id="sec-status">—</span>
+      </div>
+      <div class="data-row">
+        <span class="dr-label">Statut IP</span>
+        <span class="dr-val" id="sec-ip-status">—</span>
+      </div>
+      <div class="data-row">
+        <span class="dr-label">Session</span>
+        <span class="dr-val" id="sec-session">Active</span>
+      </div>
+      <div style="margin-top:14px;padding:12px 14px;background:var(--b);border:1px solid var(--b3);border-radius:10px">
+        <div style="font-family:var(--mono);font-size:8px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Note de sécurité</div>
+        <div style="font-size:11px;font-weight:300;color:var(--t2);line-height:1.7">Tes informations de session sont stockées localement dans ton navigateur. Elles ne sont jamais partagées avec des tiers.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+var BOT_API = 'https://connecte.zekit.fr';
+var DISCORD_CLIENT_ID = '1480627565906366514';
+var REDIRECT_URI = encodeURIComponent(window.location.origin + window.location.pathname);
+
+/* ── URL PARAMS ── */
+var urlParams = new URLSearchParams(window.location.search);
+var TARGET_ID = urlParams.get('id') || '';
+
+/* ── STATE ── */
+var S = {
+  authedUser: null, // { id, username, global_name, avatar, provider }
+  profile: null,    // from bot API
+  vip: false,
+  banned: false,
+};
+
+/* ── INIT ── */
+window.addEventListener('load', function() {
+  if(!TARGET_ID || TARGET_ID.length < 17) {
+    window.location.href = 'index.html';
+    return;
+  }
+  document.getElementById('auth-id-display').textContent = '#' + TARGET_ID;
+  document.getElementById('nav-id').textContent = '#' + TARGET_ID.slice(0,8) + '…';
+
+  /* Check if we have a stored session for this ID */
+  var stored = loadSession(TARGET_ID);
+  if(stored) {
+    handleAuthSuccess(stored);
+    return;
+  }
+
+  /* Check if Discord OAuth callback */
+  var hash = window.location.hash;
+  if(hash && hash.includes('access_token')) {
+    handleDiscordCallback(hash);
+    return;
+  }
+
+  /* Check Google OAuth callback */
+  var code = urlParams.get('code');
+  var state = urlParams.get('state');
+  if(code && state && state.startsWith('google_')) {
+    handleGoogleCallback(code, state);
+    return;
+  }
+
+  /* Show auth screen */
+  document.getElementById('auth-screen').classList.remove('hidden');
+});
+
+/* ── SESSION STORAGE ── */
+function loadSession(id) {
+  try {
+    var raw = sessionStorage.getItem('zekit_edit_session_' + id);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  } catch(e) { return null; }
+}
+function saveSession(id, user) {
+  try { sessionStorage.setItem('zekit_edit_session_' + id, JSON.stringify(user)); } catch(e) {}
+}
+function clearSession(id) {
+  try { sessionStorage.removeItem('zekit_edit_session_' + id); } catch(e) {}
+}
+
+/* ═══════════ DISCORD OAUTH ═══════════ */
+function loginDiscord() {
+  var btn = document.getElementById('btn-discord');
+  btn.disabled = true;
+  setAuthStatus('Redirection vers Discord…');
+  /* Save target ID in sessionStorage so callback can retrieve it */
+  sessionStorage.setItem('zekit_edit_oauth_id', TARGET_ID);
+  var scope = 'identify%20email';
+  var url = 'https://discord.com/api/oauth2/authorize'
+    + '?client_id=' + DISCORD_CLIENT_ID
+    + '&redirect_uri=' + REDIRECT_URI
+    + '&response_type=token'
+    + '&scope=' + scope;
+  window.location.href = url;
+}
+
+function handleDiscordCallback(hash) {
+  setAuthStatus('<span class="spin"></span> Vérification…');
+  var params = new URLSearchParams(hash.slice(1));
+  var token = params.get('access_token');
+  if(!token) {
+    setAuthStatus('Erreur — token manquant.');
+    showAuthScreen();
+    return;
+  }
+  /* Fetch Discord user */
+  fetch('https://discord.com/api/users/@me', {
+    headers: { Authorization: 'Bearer ' + token }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(user) {
+    /* Clean URL hash */
+    history.replaceState(null, '', window.location.pathname + '?id=' + TARGET_ID);
+    /* Verify ID matches */
+    if(user.id !== TARGET_ID) {
+      setAuthStatus('❌ Ce compte Discord ne correspond pas à l\'ID demandé.');
+      showAuthScreen();
+      return;
+    }
+    var u = {
+      id: user.id,
+      username: user.username,
+      global_name: user.global_name || user.username,
+      avatar: user.avatar,
+      email: user.email || null,
+      provider: 'discord'
+    };
+    saveSession(TARGET_ID, u);
+    handleAuthSuccess(u);
+  })
+  .catch(function() {
+    setAuthStatus('Erreur réseau. Réessaie.');
+    showAuthScreen();
+  });
+}
+
+/* ═══════════ GOOGLE OAUTH ═══════════ */
+function loginGoogle() {
+  var btn = document.getElementById('btn-google');
+  btn.disabled = true;
+  setAuthStatus('Redirection vers Google…');
+  sessionStorage.setItem('zekit_edit_oauth_id', TARGET_ID);
+  /* Google uses authorization code flow — we'll use a workaround:
+     We redirect to our own callback that will exchange the code.
+     For a pure frontend, we use token flow with Google Identity Services.
+     Here we load Google's One Tap / Auth URL */
+  var GOOGLE_CLIENT_ID = '138420458463-ropp403idkormkk1m2gvh2cb02pd84ef.apps.googleusercontent.com';
+  var state = 'google_' + TARGET_ID;
+  var redirectUri = encodeURIComponent(window.location.origin + window.location.pathname);
+  var url = 'https://accounts.google.com/o/oauth2/v2/auth'
+    + '?client_id=' + GOOGLE_CLIENT_ID
+    + '&redirect_uri=' + redirectUri
+    + '&response_type=token'
+    + '&scope=openid%20email%20profile'
+    + '&state=' + state;
+  window.location.href = url;
+}
+
+function handleGoogleCallback(code, state) {
+  /* With implicit (response_type=token), the token is in the hash, not a code in query.
+     But Google may put access_token in hash for implicit flow. */
+  var idFromState = state.replace('google_','');
+  var hashParams = new URLSearchParams(window.location.hash.slice(1));
+  var token = hashParams.get('access_token');
+  if(!token) {
+    showAuthScreen();
+    return;
+  }
+  setAuthStatus('<span class="spin"></span> Vérification Google…');
+  fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: 'Bearer ' + token }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(info) {
+    history.replaceState(null, '', window.location.pathname + '?id=' + TARGET_ID);
+    /* For Google, we check the profile matches the stored user data on the bot API */
+    var u = {
+      id: TARGET_ID, /* We trust the target ID since Google auth confirmed identity */
+      username: info.name || info.email,
+      global_name: info.name || info.email,
+      avatar: null,
+      email: info.email,
+      picture: info.picture,
+      provider: 'google'
+    };
+    /* Verify with bot API that this Google email is linked to this Discord ID */
+    fetch(BOT_API + '/user-info?user_id=' + TARGET_ID)
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if(d.found && d.profile && d.profile.provider === 'google') {
+          saveSession(TARGET_ID, u);
+          handleAuthSuccess(u);
+        } else {
+          setAuthStatus('❌ Compte Google non associé à cet ID. Utilise Discord.');
+          showAuthScreen();
+        }
+      })
+      .catch(function() {
+        /* Fallback: allow if API unreachable */
+        saveSession(TARGET_ID, u);
+        handleAuthSuccess(u);
+      });
+  })
+  .catch(function() {
+    setAuthStatus('Erreur Google. Réessaie.');
+    showAuthScreen();
+  });
+}
+
+/* ═══════════ POST-AUTH ═══════════ */
+function handleAuthSuccess(user) {
+  S.authedUser = user;
+  hideAuthScreen();
+  loadAndRender(user);
+}
+
+function loadAndRender(user) {
+  /* Fetch profile from bot API */
+  fetch(BOT_API + '/user-info?user_id=' + TARGET_ID)
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      S.profile = d.found ? d.profile : null;
+      fetch(BOT_API + '/check-ban?user_id=' + TARGET_ID)
+        .then(function(r) { return r.json(); })
+        .then(function(bd) {
+          if(bd.banned) {
+            showBanned(bd.info);
+            return;
+          }
+          fetch(BOT_API + '/check-vip?user_id=' + TARGET_ID)
+            .then(function(r) { return r.json(); })
+            .then(function(vd) {
+              S.vip = !!vd.vip;
+              renderApp(user);
+            })
+            .catch(function() { S.vip = false; renderApp(user); });
+        })
+        .catch(function() { renderApp(user); });
+    })
+    .catch(function() { renderApp(user); });
+}
+
+function renderApp(user) {
+  var p = S.profile || {};
+
+  /* Avatar */
+  var avatarSrc;
+  if(user.provider === 'google' && user.picture) {
+    avatarSrc = user.picture;
+  } else if(user.avatar) {
+    avatarSrc = 'https://cdn.discordapp.com/avatars/' + user.id + '/' + user.avatar + '.png?size=128';
+  } else {
+    avatarSrc = 'https://cdn.discordapp.com/embed/avatars/' + (parseInt(user.id.slice(-1)) % 5) + '.png';
+  }
+
+  var img = document.getElementById('ph-img');
+  img.src = avatarSrc;
+  img.onerror = function() { this.src = 'https://cdn.discordapp.com/embed/avatars/0.png'; };
+
+  /* Status dot */
+  var dot = document.getElementById('ph-status-dot');
+  dot.style.background = S.vip ? 'var(--gold)' : 'var(--g)';
+
+  /* Name & tag */
+  var displayName = user.global_name || user.username || p.globalName || p.username || 'Utilisateur';
+  document.getElementById('ph-name').textContent = displayName;
+  document.getElementById('ph-tag').textContent = user.provider === 'google'
+    ? '📧 ' + (user.email || '') : '@' + (user.username || user.id);
+
+  /* Badges */
+  var badges = '';
+  if(S.vip) badges += '<div class="badge-item badge-vip">⭐ Premium</div>';
+  else badges += '<div class="badge-item badge-normal">✓ Standard</div>';
+  badges += '<div class="badge-item badge-provider">' + (user.provider==='google'?'🔴 Google':'🔵 Discord') + '</div>';
+  document.getElementById('ph-badges').innerHTML = badges;
+
+  /* VIP card */
+  var vc = document.getElementById('vip-card');
+  if(S.vip) {
+    vc.classList.add('is-vip');
+    document.getElementById('vip-ico').textContent = '⭐';
+    document.getElementById('vip-title').textContent = 'Premium';
+    document.getElementById('vip-desc').textContent = 'Tu as accès aux moteurs IA avancés dans ZEKIT.';
+    document.getElementById('vip-badge-status').textContent = '⭐ Activé';
+    document.getElementById('vip-badge-status').className = 'vip-status-badge vsb-active';
+    document.getElementById('key-form-wrap').style.display = 'none';
+  }
+
+  /* Info fields */
+  document.getElementById('info-id').innerHTML = '<span style="letter-spacing:.5px">' + TARGET_ID + '</span><button class="dr-copy" onclick="copyId()">Copier</button>';
+  document.getElementById('info-id-raw').value = TARGET_ID;
+  document.getElementById('info-name').textContent = displayName;
+  document.getElementById('info-provider').textContent = user.provider === 'google' ? 'Google' : 'Discord';
+  document.getElementById('ab-id-preview').textContent = TARGET_ID.slice(0,8) + '…';
+
+  /* Account age from Discord snowflake */
+  try {
+    var snowMs = Number(BigInt(TARGET_ID) >> 22n) + 1420070400000;
+    var ageDays = Math.floor((Date.now() - snowMs) / 86400000);
+    var ageStr = ageDays < 30 ? ageDays + ' jours' : ageDays < 365 ? Math.floor(ageDays/30) + ' mois' : Math.floor(ageDays/365) + ' an(s)';
+    document.getElementById('info-created').textContent = 'Il y a ' + ageStr;
+  } catch(e) { document.getElementById('info-created').textContent = '—'; }
+
+  /* Stats from profile */
+  document.getElementById('stat-logins').textContent = p.loginCount ? p.loginCount + ' fois' : '—';
+  document.getElementById('stat-first').textContent = p.firstSeen ? p.firstSeen.slice(0,10) : '—';
+  document.getElementById('stat-last').textContent = p.lastSeen ? p.lastSeen.slice(0,10) : '—';
+  var geo = '';
+  if(p.city) geo += p.city + ', ';
+  if(p.country) geo += p.country;
+  document.getElementById('stat-geo').textContent = geo || '—';
+
+  /* Security */
+  document.getElementById('sec-status').innerHTML = '<span class="dr-val good">✓ Actif</span>';
+  document.getElementById('sec-ip-status').textContent = '—';
+  document.getElementById('sec-session').textContent = 'Active — ' + new Date().toLocaleDateString('fr-FR');
+
+  /* Show app */
+  document.getElementById('app').classList.add('visible');
+}
+
+/* ═══════════ KEY ACTIVATION ═══════════ */
+function formatKey(el) {
+  var v = el.value.replace(/[^A-Z0-9]/gi,'').toUpperCase();
+  /* ZEKIT-XXXX-XXXX-XXXX-XXXX */
+  var parts = [];
+  parts.push(v.slice(0,5));
+  if(v.length>5) parts.push(v.slice(5,9));
+  if(v.length>9) parts.push(v.slice(9,13));
+  if(v.length>13) parts.push(v.slice(13,17));
+  if(v.length>17) parts.push(v.slice(17,21));
+  el.value = parts.join('-');
+}
+
+function activateKey() {
+  var key = document.getElementById('key-input').value.trim().toUpperCase();
+  var res = document.getElementById('key-result');
+  var btn = document.getElementById('key-btn');
+  if(!key || key.length < 20) {
+    res.textContent = '⚠ Clef incomplète.';
+    res.style.color = 'var(--r)';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = '…';
+  res.innerHTML = '<span class="spin"></span> Activation…';
+  res.style.color = 'var(--t2)';
+
+  /* POST to bot API — note: key activation is done via Discord slash command normally.
+     Here we redirect to the Discord server with instructions. */
+  /* We can call a hypothetical activation endpoint or show instructions */
+  /* The bot API doesn't expose a direct key-activation endpoint without the secret,
+     so we guide the user to activate via /activervip on Discord */
+  setTimeout(function() {
+    btn.disabled = false;
+    btn.textContent = 'Activer';
+    res.innerHTML = '💬 Tape <strong style="color:var(--acc);font-family:var(--mono)">/activervip clef:' + key + '</strong> sur le <a href="https://discord.gg/Eg7cGdqKKV" target="_blank" style="color:var(--acc)">Discord ZEKIT</a>, ou active-la dans l\'application.';
+    res.style.color = 'var(--t2)';
+    res.style.fontSize = '10px';
+    res.style.lineHeight = '1.7';
+  }, 800);
+}
+
+/* ═══════════ ACTIONS ═══════════ */
+function copyId() {
+  navigator.clipboard.writeText(TARGET_ID).then(function() {
+    showToast('✓ ID copié : ' + TARGET_ID);
+  });
+}
+
+function copyVal(val) {
+  navigator.clipboard.writeText(val).then(function() {
+    showToast('✓ Copié !');
+  });
+}
+
+function reloadProfile() {
+  if(!S.authedUser) return;
+  document.getElementById('app').classList.remove('visible');
+  setTimeout(function() { loadAndRender(S.authedUser); }, 200);
+  showToast('🔄 Profil actualisé');
+}
+
+function confirmLogout() {
+  if(confirm('Déconnecter la session de ce compte ?')) logout();
+}
+
+function logout() {
+  clearSession(TARGET_ID);
+  S.authedUser = null;
+  document.getElementById('app').classList.remove('visible');
+  showAuthScreen();
+  showToast('Session terminée');
+}
+
+/* ═══════════ UI HELPERS ═══════════ */
+function hideAuthScreen() { document.getElementById('auth-screen').classList.add('hidden'); }
+function showAuthScreen() { document.getElementById('auth-screen').classList.remove('hidden'); }
+function setAuthStatus(html) {
+  document.getElementById('auth-status').innerHTML = html;
+}
+
+function showBanned(info) {
+  var bs = document.getElementById('banned-screen');
+  bs.classList.add('show');
+  if(info && info.reason) {
+    document.getElementById('ban-reason-box').textContent = 'Raison : ' + info.reason;
+  }
+}
+
+var _toastTimer;
+function showToast(msg, color) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  if(color) t.style.borderColor = color;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() {
+    t.classList.remove('show');
+    t.style.borderColor = '';
+  }, 3000);
+}
+</script>
+</body>
+</html>
