@@ -208,7 +208,7 @@ function onKey(e){ if(e.key==='Enter') goToAccount(); }
 
 function goToAccount(){
   var id = document.getElementById('idInput').value.trim();
-  if(!id || id.length < 17 || id.length > 20){
+  if(!id || id.length < 17 || id.length > 22){
     document.getElementById('searchError').style.display='block';
     return;
   }
